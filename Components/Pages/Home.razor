@@ -1,0 +1,60 @@
+@page "/"
+
+<div class="app-container">
+    <div class="project-info">
+        <h3>LrcMaker: AI-Powered LRC File Generator</h3>
+        <p>This tool allows you to generate LRC (Lyrics Synchronized) files by providing plain lyrics and an audio track. It uses AI to attempt to synchronize the lyrics with the audio.</p>
+        <p class="warning-note">
+            <strong>Please note:</strong> The generated LRC files may contain minor inaccuracies. It is recommended to manually review and adjust the timestamps for optimal synchronization.
+        </p>
+    </div>
+    <div class="content-grid">
+        <div class="input-section">
+            <div class="field">
+                <label>Your Groq API Key</label>
+                <div class="api-key-group">
+                    <input @bind="GroqApiKey" type="password" placeholder="gsk_..." class="api-key-input" />
+                    <button @onclick="UpdateApiKey" class="save-key-btn">Save</button>
+                </div>
+                @if (!string.IsNullOrEmpty(ApiKeyStatusMessage))
+                {
+                    <div class="api-key-status">@ApiKeyStatusMessage</div>
+                }
+            </div>
+            <div class="field">
+                <label>Lyrics Source</label>
+                <textarea @bind="LyricsText" placeholder="Paste clean lyrics here..."></textarea>
+            </div>
+    
+            <div class="field">
+                <div class="upload-box">
+                    <InputFile OnChange="OnInputFileChange" id="audio-input" hidden />
+                    <label for="audio-input" class="upload-trigger">
+                        <span class="icon">@(SelectedFile != null ? "✓" : "+")</span>
+                        <span class="text">@(SelectedFile != null ? SelectedFile.Name : "Upload Audio Track")</span>
+                    </label>
+                </div>
+            </div>
+    
+            <button class="start-btn" @onclick="Process" disabled="@IsBusy">
+                @(IsBusy ? "Processing..." : "Generate LRC")
+            </button>
+        </div>
+    
+        <div class="status-section">
+            <label>System Output</label>
+            <div class="terminal-view">
+                @foreach (var log in Logs)
+                {
+                    <div class="log-line @(log.StartsWith("!!!") ? "log-error" : "")">@log</div>
+                }
+                @if (IsBusy) { <div class="pulse-loader"></div> }
+            </div>
+    
+            @if (!string.IsNullOrEmpty(DownloadUrl))
+            {
+                <a href="@DownloadUrl" download="sync.lrc" class="download-btn">Download .lrc</a>
+            }
+        </div>
+    </div>
+</div>
